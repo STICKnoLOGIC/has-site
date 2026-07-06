@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Has Site -- Simple Bcrypt Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+        .section { border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .copy-btn { background: #28a745; width: auto; padding: 5px 15px; font-size: 0.9rem; margin-left: 10px; }
+        .copy-btn:hover { background: #218838; }
+        
+        .result-container { display: flex; align-items: center; justify-content: space-between; margin-top: 5px; }
+        textarea { width: 100%; height: 80px; padding: 10px; box-sizing: border-box; font-family: monospace; }
+        .result { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; word-break: break-all; font-family: monospace; font-size: 0.9rem; flex-grow: 1; margin-right: 10px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Bcrypt Hash & Verify</h1>
+
+    <!-- Section 1: Hash (Encode) -->
+    <div class="section">
+        <h2>1. Hash Password (Encode)</h2>
+        <p>Enter a password to generate a secure bcrypt hash.</p>
+        <input type="text" id="inputPassword" placeholder="Enter password to hash">
+        <button onclick="generateHash()">Generate Hash</button>
+        <p>Result:</p>
+        <!-- Updated Result Area with Copy Button -->
+        <div class="result-container">
+            <div id="hashOutput" class="result">Hash will appear here...</div>
+            <button id="copyBtn" class="copy-btn" onclick="copyHash()" style="display:none;">Copy</button>
+        </div>
+        <div id="copyStatus" style="font-size: 0.8rem; height: 1rem; color: #28a745;"></div>
+    </div>
+
+    <!-- Section 2: Verify (Compare) -->
+    <div class="section">
+        <h2>2. Verify Password (Compare)</h2>
+        <p>Enter a password and the hash to check if they match.</p>
+        <input type="text" id="verifyPassword" placeholder="Enter plain text password">
+        <textarea id="verifyHash" placeholder="Paste the bcrypt hash here"></textarea>
+        <button onclick="verifyPassword()">Check Match</button>
+        <p>Result:</p>
+        <div id="verifyOutput" class="result">Result will appear here...</div>
+    </div>
+
+    <script>
+        function generateHash() {
+            const password = document.getElementById('inputPassword').value;
+            const copyBtn = document.getElementById('copyBtn');
+            const copyStatus = document.getElementById('copyStatus');
+            
+            if (!password) {
+                alert("Please enter a password");
+                return;
+            }
+
+            const salt = dcodeIO.bcrypt.genSaltSync(10);
+            const hash = dcodeIO.bcrypt.hashSync(password, salt);
+
+            const outputDiv = document.getElementById('hashOutput');
+            outputDiv.innerText = hash;
+            
+            copyBtn.style.display = 'inline-block';
+            copyStatus.innerText = '';
+            
+            document.getElementById('verifyHash').value = hash;
+        }
+
+        async function copyHash() {
+            const hashText = document.getElementById('hashOutput').innerText;
+            const copyStatus = document.getElementById('copyStatus');
+
+            if (!hashText || hashText === "Hash will appear here...") {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(hashText);
+                
+                copyStatus.innerText = "✓ Copied to clipboard!";
+                setTimeout(() => {
+                    copyStatus.innerText = "";
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                copyStatus.innerText = "✗ Failed to copy, you can manually select and copy the result!";
+                copyStatus.style.color = "red";
+            }
+        }
+
+        function verifyPassword() {
+            const password = document.getElementById('verifyPassword').value;
+            const hash = document.getElementById('verifyHash').value;
+            const outputDiv = document.getElementById('verifyOutput');
+
+            if (!password || !hash) {
+                outputDiv.innerHTML = "<span class='error'>Please fill in both fields.</span>";
+                return;
+            }
+
+            try {
+                const isValid = dcodeIO.bcrypt.compareSync(password, hash);
+
+                if (isValid) {
+                    outputDiv.innerHTML = "<span class='success'>✓ Match! Password is correct.</span>";
+                } else {
+                    outputDiv.innerHTML = "<span class='error'>✗ No Match. Password is incorrect.</span>";
+                }
+            } catch (e) {
+                outputDiv.innerHTML = "<span class='error'>Invalid Hash Format</span>";
+            }
+        }
+    </script>
+</body>
+</html>   
