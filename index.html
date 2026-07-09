@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Has Site -- Simple Bcrypt Tool</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@3.0.3/umd/index.min.js"></script>   
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
         .section { border: 1px solid #ccc; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
@@ -19,6 +19,36 @@
         .result { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; word-break: break-all; font-family: monospace; font-size: 0.9rem; flex-grow: 1; margin-right: 10px; }
         .success { color: green; font-weight: bold; }
         .error { color: red; font-weight: bold; }
+        details {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none; /* Hides default triangle in some browsers */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        /* Custom Arrow */
+        summary::after {
+            content: '+'; 
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg); /* Turns + into x */
+        }
+        /* Optional: Hide default marker if not using list-style: none */
+        summary::-webkit-details-marker {
+            display: none;
+        }
+        .content {
+            margin-top: 10px;
+            color: #555;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -50,7 +80,26 @@
         <p>Result:</p>
         <div id="verifyOutput" class="result">Result will appear here...</div>
     </div>
-
+    <hr/>
+    <h1 id="faqs"> FAQs:</h1>
+    <details>
+        <summary>is the Tool is safe to use?</summary>
+        <div class="content">
+            <p>Yes! All processing happens in your browser using the bcryptjs library. No data is sent to any servers or stored anywhere. you can check our source code here: <a href="https://github.com/sticknologic/has-site">https://github.com/sticknologic/has-site</a></p>
+        </div>
+    </details><details>
+        <summary>What is bcrypt??</summary>
+        <div class="content">
+            <p>Bcrypt is a password hashing function designed to be computationally intensive. It's commonly used for securely storing passwords in databases.</p>
+        </div>
+    </details>
+    <hr/>
+    <footer style="text-align: center; padding: 20px; border-top: 1px solid #ddd; font-family: sans-serif;">
+        <p style="margin: 5px 0; color: #555;">
+            Created by: <a href="https://sicknologic.is-a.dev" style="color: #007bff; text-decoration: none; font-weight: bold;">STICKnoLOGIC</a>
+        </p>
+        <p style="margin: 5px 0; color: #777; font-size: 0.9em;">Built with privacy in mind.</p>
+    </footer>   
     <script>
         function generateHash() {
             const password = document.getElementById('inputPassword').value;
@@ -62,8 +111,8 @@
                 return;
             }
 
-            const salt = dcodeIO.bcrypt.genSaltSync(10);
-            const hash = dcodeIO.bcrypt.hashSync(password, salt);
+            const salt = bcrypt.genSaltSync(12);
+            const hash = bcrypt.hashSync(password, salt);
 
             const outputDiv = document.getElementById('hashOutput');
             outputDiv.innerText = hash;
@@ -85,7 +134,7 @@
             try {
                 await navigator.clipboard.writeText(hashText);
                 
-                copyStatus.innerText = "✓ Copied to clipboard!";
+                copyStatus.innerText = "✓ Copied to clipboard!\n NOTE: if you are using it for laravel, replace the first character \"2$x$\" (where \"x\" is a letter e.g b or a) to \"2$y$\"";
                 setTimeout(() => {
                     copyStatus.innerText = "";
                 }, 2000);
